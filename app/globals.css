@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Brittany';
+  src: url('/fonts/BrittanySignature.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Parisienne';
+  src: url('/fonts/1735Parisienne.woff2') format('woff2'),
+       url('/fonts/1735Parisienne.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --color-sand: #d1b7a1;
+  --color-terracotta: #854839;
+  --color-blush: #f0e0dd;
+  --color-charcoal: #262626;
+  --font-serif: 'Noto Serif', serif;
+  --font-script: 'Brittany', 'Parisienne', cursive;
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* transitions-dev Motion Tokens */
+  --duration-stagger: 40ms;
+  --duration-micro: 80ms;
+  --duration-quick: 150ms;
+  --duration-fast: 250ms;
+  --duration-medium: 350ms;
+  --duration-slow: 400ms;
+  --duration-very-slow: 500ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: ease-in-out;
+  --ease-out: ease-out;
+
+  /* Accordion tokens from transitions-dev */
+  --acc-expand: 250ms;
+  --acc-collapse: 250ms;
+  --acc-chevron: 250ms;
+  --acc-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Menu dropdown tokens */
+  --dropdown-open-dur: 250ms;
+  --dropdown-close-dur: 150ms;
+  --dropdown-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Modal tokens from transitions-dev */
+  --modal-open-dur: 250ms;
+  --modal-close-dur: 150ms;
+  --modal-scale: 0.96;
+  --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Hover micro-interactions */
+  --hover-dur: 350ms;
+  --hover-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: #262626;
+  background-color: #ffffff;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: #d1b7a1;
+  color: #ffffff;
+}
+
+.font-script {
+  font-family: 'Brittany', 'Parisienne', cursive;
+}
+
+.font-serif {
+  font-family: 'Noto Serif', serif;
+}
+
+.font-sans {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Luxury transitions & micro-interactions with transitions.dev tokens */
+.transition-luxury {
+  transition: all var(--duration-very-slow) var(--ease-smooth-out);
+}
+
+.hover-lift {
+  transition: transform var(--hover-dur) var(--hover-ease), box-shadow var(--hover-dur) var(--hover-ease);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}

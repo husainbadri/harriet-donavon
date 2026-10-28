@@ -1,0 +1,17 @@
+node_modules
+.next
+*.wpress
+wp_extracted
+wp_pages_dump
+live_site_data
+captured_screenshots
+screenshots
+capture_sections.mjs
+extract_live_site.mjs
+dump_exact_typography.mjs
+*.py
+exact_live_typography.json
+.DS_Store
+.kilo
+.vercel
+.env*
