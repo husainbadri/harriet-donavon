@@ -46,18 +46,18 @@ export default function HomePage() {
       {/* ============================================================== */}
       {/* 2. HERO SCRIPT HEADLINE (White Background) */}
       {/* ============================================================== */}
-      <section className="relative w-full bg-white pt-8 sm:pt-10 md:pt-12 pb-14 sm:pb-20 lg:pb-24 overflow-visible">
+      <section className="relative w-full bg-white py-6 md:py-8 overflow-visible z-10">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-0">
-          <div className="flex flex-col md:flex-row items-start justify-between">
+          <div className="flex flex-col md:flex-row items-center justify-between">
             {/* Left: Impactful style headline */}
-            <div className="w-full md:w-[50%] z-10 pt-2 md:pt-4">
-              <h2 className="font-script text-[42px] sm:text-[54px] lg:text-[67px] text-black font-light leading-[1.25] text-left">
+            <div className="w-full md:w-[50%] z-10">
+              <h2 className="font-script text-[42px] sm:text-[54px] lg:text-[67px] text-black font-light leading-[1.22] text-left">
                 Impactful style that <br />
                 takes you to your dreams
               </h2>
             </div>
             {/* Right: Spacer for cane chair photo bottom hanging into this section */}
-            <div className="hidden md:block w-full md:w-[50%] min-h-[150px]" />
+            <div className="hidden md:block w-full md:w-[50%] min-h-[130px] lg:min-h-[150px]" />
           </div>
         </div>
       </section>
@@ -65,7 +65,7 @@ export default function HomePage() {
       {/* ============================================================== */}
       {/* 3. STYLE SUCCESS BANNER WITH VIDEO BACKGROUND */}
       {/* ============================================================== */}
-      <section className="relative w-full min-h-[500px] lg:h-[700px] flex items-center justify-center overflow-hidden bg-black">
+      <section className="relative w-full min-h-[450px] md:h-[600px] lg:h-[700px] flex items-center justify-center overflow-hidden bg-black">
         {/* Background Video */}
         <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
           <video
