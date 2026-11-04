@@ -8,17 +8,17 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* ============================================================== */}
-      {/* 1. HERO SECTION 1 - WARM SAND BLOCK (#d1b7a1) */}
+      {/* 1. HERO SECTION: SAND BLOCK (#d1b7a1) */}
       {/* ============================================================== */}
-      <section className="relative bg-[#d1b7a1] pt-16 sm:pt-20 pb-0 overflow-visible z-10">
+      <section className="relative w-full pt-[100px] lg:pt-[120px] bg-[#d1b7a1] overflow-visible">
         <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Left: Brand Logo (40% width) */}
-            <div className="lg:col-span-5 pb-10 lg:pb-16 flex justify-center lg:justify-start">
-              <div className="relative w-[340px] h-[190px] sm:w-[408px] sm:h-[232px]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[460px] lg:min-h-[560px]">
+            {/* Left: Brand Logo */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-start py-8 lg:py-0">
+              <div className="relative w-[300px] h-[170px] sm:w-[408px] sm:h-[232px]">
                 <Image
                   src="/images/cropped-Harriet_O_Donovan_logo-transparent.png"
-                  alt="Harriet O'Donovan Dubai"
+                  alt="Harriet O'Donovan Styling"
                   fill
                   className="object-contain object-left"
                   priority
@@ -26,9 +26,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Harriet Hero Image hanging 150px below sand container */}
+            {/* Right: Harriet Photo in Cane Chair - Hanging 150px down into white section */}
             <div className="lg:col-span-7 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[620px] lg:max-w-[720px] aspect-square lg:-mb-[150px] z-20">
+              <div className="relative w-full max-w-[480px] sm:max-w-[580px] lg:max-w-[700px] aspect-square lg:translate-y-[150px] z-20">
                 <Image
                   src="/images/Harriet-homepage-hero-image-1.webp"
                   alt="Harriet - homepage hero-image"
@@ -43,21 +43,28 @@ export default function HomePage() {
       </section>
 
       {/* ============================================================== */}
-      {/* 2. HERO SECTION 2 - SCRIPT HEADLINE */}
+      {/* 2. HERO SCRIPT HEADLINE (White Background) */}
       {/* ============================================================== */}
-      <section className="relative bg-white pt-16 lg:pt-28 pb-14 px-6 sm:px-10 lg:px-16 z-10">
-        <div className="max-w-[1440px] mx-auto">
-          <h2 className="font-script text-[48px] sm:text-[58px] lg:text-[67px] text-black font-light leading-[1.25] text-left max-w-4xl">
-            Impactful style that <br />
-            takes you to your dreams
-          </h2>
+      <section className="relative w-full bg-white pt-10 sm:pt-14 lg:pt-16 pb-14 sm:pb-20 lg:pb-24 overflow-visible">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left: Impactful style headline */}
+            <div className="lg:col-span-6 z-10">
+              <h2 className="font-script text-[42px] sm:text-[54px] lg:text-[67px] text-black font-light leading-[1.25] text-left">
+                Impactful style that <br />
+                takes you to your dreams
+              </h2>
+            </div>
+            {/* Right: Spacer for cane chair photo overlap on desktop */}
+            <div className="hidden lg:block lg:col-span-6 min-h-[150px]" />
+          </div>
         </div>
       </section>
 
       {/* ============================================================== */}
       {/* 3. STYLE SUCCESS BANNER WITH VIDEO BACKGROUND */}
       {/* ============================================================== */}
-      <section className="relative w-full min-h-[500px] lg:min-h-[700px] flex items-center justify-center overflow-hidden bg-black">
+      <section className="relative w-full min-h-[500px] lg:h-[700px] flex items-center justify-center overflow-hidden bg-black">
         {/* Background Video */}
         <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
           <video
@@ -70,13 +77,13 @@ export default function HomePage() {
           >
             <source src="/images/Harriet.mp4" type="video/mp4" />
           </video>
-          {/* 50% Black Overlay */}
-          <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+          {/* Subtle Dark Overlay */}
+          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
         </div>
 
         {/* Overlay Heading in #f0e0dd */}
         <div className="relative z-10 px-4 sm:px-6 text-center">
-          <h2 className="font-script text-[48px] sm:text-[58px] lg:text-[65px] text-[#f0e0dd] leading-[1.25] font-light drop-shadow-sm">
+          <h2 className="font-script text-[46px] sm:text-[56px] lg:text-[65px] text-[#f0e0dd] leading-[1.25] font-light">
             Ready for your style success?
           </h2>
         </div>
