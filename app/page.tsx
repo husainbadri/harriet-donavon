@@ -10,12 +10,12 @@ export default function HomePage() {
       {/* ============================================================== */}
       {/* 1. HERO SECTION: SAND BLOCK (#d1b7a1) */}
       {/* ============================================================== */}
-      <section className="relative w-full pt-[100px] lg:pt-[120px] bg-[#d1b7a1] overflow-visible">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[460px] lg:min-h-[560px]">
-            {/* Left: Brand Logo */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-start py-8 lg:py-0">
-              <div className="relative w-[300px] h-[170px] sm:w-[408px] sm:h-[232px]">
+      <section className="relative w-full pt-[90px] lg:pt-[120px] bg-[#d1b7a1] overflow-visible pr-0 md:pr-10">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-0">
+          <div className="relative flex flex-col md:flex-row items-center justify-between min-h-[460px] md:min-h-[500px]">
+            {/* Left: Brand Logo (40% width, vertically centered) */}
+            <div className="w-full md:w-[40%] flex justify-center md:justify-start items-center py-6 md:py-0">
+              <div className="relative w-[320px] h-[180px] sm:w-[380px] sm:h-[216px] lg:w-[408px] lg:h-[232px]">
                 <Image
                   src="/images/cropped-Harriet_O_Donovan_logo-transparent.png"
                   alt="Harriet O'Donovan Styling"
@@ -26,9 +26,10 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Harriet Photo in Cane Chair - Hanging 150px down into white section */}
-            <div className="lg:col-span-7 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[480px] sm:max-w-[580px] lg:max-w-[700px] aspect-square lg:translate-y-[150px] z-20">
+            {/* Right: Harriet Photo in Cane Chair (60% width) */}
+            {/* Starts 50px below top of sand content and hangs 150px into white section below */}
+            <div className="relative w-full md:w-[60%] flex justify-center md:justify-end items-center">
+              <div className="relative w-full aspect-square max-w-[500px] md:max-w-[720px] mt-[30px] md:mt-[50px] -mb-[120px] md:-mb-[150px] z-20">
                 <Image
                   src="/images/Harriet-homepage-hero-image-1.webp"
                   alt="Harriet - homepage hero-image"
@@ -45,18 +46,18 @@ export default function HomePage() {
       {/* ============================================================== */}
       {/* 2. HERO SCRIPT HEADLINE (White Background) */}
       {/* ============================================================== */}
-      <section className="relative w-full bg-white pt-10 sm:pt-14 lg:pt-16 pb-14 sm:pb-20 lg:pb-24 overflow-visible">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <section className="relative w-full bg-white pt-8 sm:pt-10 md:pt-12 pb-14 sm:pb-20 lg:pb-24 overflow-visible">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 md:px-0">
+          <div className="flex flex-col md:flex-row items-start justify-between">
             {/* Left: Impactful style headline */}
-            <div className="lg:col-span-6 z-10">
+            <div className="w-full md:w-[50%] z-10 pt-2 md:pt-4">
               <h2 className="font-script text-[42px] sm:text-[54px] lg:text-[67px] text-black font-light leading-[1.25] text-left">
                 Impactful style that <br />
                 takes you to your dreams
               </h2>
             </div>
-            {/* Right: Spacer for cane chair photo overlap on desktop */}
-            <div className="hidden lg:block lg:col-span-6 min-h-[150px]" />
+            {/* Right: Spacer for cane chair photo bottom hanging into this section */}
+            <div className="hidden md:block w-full md:w-[50%] min-h-[150px]" />
           </div>
         </div>
       </section>
