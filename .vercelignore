@@ -12,3 +12,6 @@ dump_exact_typography.mjs
 *.py
 exact_live_typography.json
 .DS_Store
+.kilo
+.vercel_backup
+.agents
