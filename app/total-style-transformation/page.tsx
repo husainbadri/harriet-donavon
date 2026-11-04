@@ -39,6 +39,7 @@ const STRIPE_APPLY_URL = "https://buy.stripe.com/9B6bJ0gP9eKYbGHb1f7ok02";
 export default function TotalStyleTransformationPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<"waitlist" | "apply">("waitlist");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Ensure video autoplay reliably starts across all browsers
@@ -49,13 +50,23 @@ export default function TotalStyleTransformationPage() {
     }
   }, []);
 
-  // Auto-open questionnaire pop-up after 3 seconds of page visit
+  // Auto-open waitlist pop-up after 3 seconds of page visit (once per session)
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsModalOpen(true);
-    }, 3000);
-    return () => clearTimeout(timer);
+    const hasSeen = sessionStorage.getItem("harriet_popup_seen");
+    if (!hasSeen) {
+      const timer = setTimeout(() => {
+        setModalMode("waitlist");
+        setIsModalOpen(true);
+        sessionStorage.setItem("harriet_popup_seen", "true");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
   }, []);
+
+  const handleOpenApply = () => {
+    setModalMode("apply");
+    setIsModalOpen(true);
+  };
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
@@ -108,7 +119,7 @@ export default function TotalStyleTransformationPage() {
 
           <div className="pt-2">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenApply}
               className="inline-block px-8 sm:px-10 py-3.5 sm:py-4 border border-white text-white text-[13px] sm:text-[14px] uppercase tracking-[0.2em] font-sans font-semibold hover:bg-white hover:text-black transition-all duration-300 cursor-pointer"
             >
               <strong>APPLY FOR THE POWER STYLE TRANSFORMATION</strong>
@@ -379,7 +390,7 @@ export default function TotalStyleTransformationPage() {
           {/* Apply Button below FAQ */}
           <div className="pt-12">
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenApply}
               className="inline-block px-8 sm:px-10 py-3.5 sm:py-4 border border-black text-black text-[13px] sm:text-[14px] uppercase tracking-[0.2em] font-sans font-semibold hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
             >
               <strong>APPLY FOR THE POWER STYLE TRANSFORMATION</strong>
@@ -411,7 +422,7 @@ export default function TotalStyleTransformationPage() {
               </p>
               <div className="pt-4">
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={handleOpenApply}
                   className="inline-block w-full py-4 px-4 border border-black text-black font-sans font-bold uppercase text-[12px] sm:text-[13px] tracking-[0.18em] hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
                 >
                   <strong>APPLY FOR THE POWER STYLE TRANSFORMATION</strong>
@@ -484,7 +495,7 @@ export default function TotalStyleTransformationPage() {
               </p>
               <div className="pt-4">
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={handleOpenApply}
                   className="inline-block w-full py-4 px-4 border border-black text-black font-sans font-bold uppercase text-[12px] sm:text-[13px] tracking-[0.18em] hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
                 >
                   <strong>APPLY FOR THE POWER STYLE TRANSFORMATION</strong>
@@ -502,8 +513,12 @@ export default function TotalStyleTransformationPage() {
         </div>
       </section>
 
-      {/* Waitlist Modal (available if needed) */}
-      <WaitlistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* Waitlist / Apply Modal */}
+      <WaitlistModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        mode={modalMode}
+      />
     </div>
   );
 }

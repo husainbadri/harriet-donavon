@@ -2,20 +2,31 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { X, CheckCircle2, ChevronRight, ArrowLeft, Loader2 } from "lucide-react";
+import { X, CheckCircle2, ChevronRight, ArrowLeft, Loader2, Lock, ArrowUpRight } from "lucide-react";
+
+const STRIPE_APPLY_URL = "https://buy.stripe.com/9B6bJ0gP9eKYbGHb1f7ok02";
 
 interface WaitlistModalProps {
   isOpen: boolean;
   onClose: () => void;
+  mode?: "waitlist" | "apply";
 }
 
-export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
-  // Step 1: Questionnaire, Step 2: 3 Contact Details (Name, Email, Business Name), Step 3: Success
+export default function WaitlistModal({ isOpen, onClose, mode = "waitlist" }: WaitlistModalProps) {
+  // In "waitlist" mode: Step 1 (Contact info pop-up) -> Step 2 (Questionnaire pop-up) -> Step 3 (Success)
+  // In "apply" mode: Direct questionnaire flow with applicant details -> redirects to payment
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Questionnaire form state
+  // Contact details (3 fields: Name, Email, Business Name)
+  const [contactData, setContactData] = useState({
+    name: "",
+    email: "",
+    businessName: "",
+  });
+
+  // Questionnaire answers
   const [answers, setAnswers] = useState({
     businessAndRole: "",
     visibilityEvents: "",
@@ -28,20 +39,34 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     anythingElse: "",
   });
 
-  // Contact details (exact 3 fields requested)
-  const [contactData, setContactData] = useState({
-    name: "",
-    email: "",
-    businessName: "",
-  });
+  // Load any previously saved responses from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedContact = localStorage.getItem("harriet_contact_data");
+      if (savedContact) {
+        setContactData(JSON.parse(savedContact));
+      }
+      const savedAnswers = localStorage.getItem("harriet_answers_data");
+      if (savedAnswers) {
+        setAnswers(JSON.parse(savedAnswers));
+      }
+    } catch {
+      // Ignore localStorage errors in private browsing
+    }
+  }, []);
 
-  const handleClose = () => {
-    onClose();
-    setTimeout(() => {
-      setStep(1);
+  // When modal opens, adjust starting step based on mode
+  useEffect(() => {
+    if (isOpen) {
       setErrorMessage("");
-    }, 250);
-  };
+      setIsSubmitting(false);
+      if (mode === "apply") {
+        setStep(2); // "apply" mode directly shows the questionnaire
+      } else {
+        setStep(1); // "waitlist" mode shows the lead pop-up first
+      }
+    }
+  }, [isOpen, mode]);
 
   // Handle ESC key and scroll lock
   useEffect(() => {
@@ -60,21 +85,26 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
-  const handleQuestionnaireNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage("");
-
-    if (!answers.businessAndRole.trim()) {
-      setErrorMessage("Please tell me about your business and your role.");
-      return;
-    }
-
-    setStep(2);
+  const handleClose = () => {
+    onClose();
+    setTimeout(() => {
+      setStep(mode === "apply" ? 2 : 1);
+      setErrorMessage("");
+      setIsSubmitting(false);
+    }, 250);
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const persistData = () => {
+    try {
+      localStorage.setItem("harriet_contact_data", JSON.stringify(contactData));
+      localStorage.setItem("harriet_answers_data", JSON.stringify(answers));
+    } catch {
+      // Ignore
+    }
+  };
+
+  // Step 1 Submit (Waitlist Pop-up: Name, Email, Business Name)
+  const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -83,18 +113,75 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
       return;
     }
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setStep(3);
-    }, 600);
+    if (!/\S+@\S+\.\S+/.test(contactData.email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    persistData();
+    // After submitting email, name, and business name, the questionnaire appears!
+    setStep(2);
   };
 
+  // Step 2 Submit (Questionnaire submitted)
+  const handleQuestionnaireSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+
+    // Validate contact info (required for both waitlist and apply mode)
+    if (!contactData.name.trim() || !contactData.email.trim() || !contactData.businessName.trim()) {
+      setErrorMessage("Please complete your full name, email, and business name.");
+      return;
+    }
+
+    if (!/\S+@\S+\.\S+/.test(contactData.email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    // Validate questionnaire primary question
+    if (!answers.businessAndRole.trim()) {
+      setErrorMessage("Please tell me about your business and your role.");
+      return;
+    }
+
+    persistData();
+    setIsSubmitting(true);
+
+    if (mode === "apply") {
+      // For the Apply buttons: after questionnaire is filled, redirect to payment page
+      setTimeout(() => {
+        const prefillParam = contactData.email
+          ? `?prefilled_email=${encodeURIComponent(contactData.email)}`
+          : "";
+        window.location.href = `${STRIPE_APPLY_URL}${prefillParam}`;
+      }, 700);
+    } else {
+      // For waitlist pop-up flow: show success state
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setStep(3);
+      }, 600);
+    }
+  };
+
+  const handleProceedToPaymentFromSuccess = () => {
+    const prefillParam = contactData.email
+      ? `?prefilled_email=${encodeURIComponent(contactData.email)}`
+      : "";
+    window.location.href = `${STRIPE_APPLY_URL}${prefillParam}`;
+  };
+
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-[12px] transition-opacity duration-300">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-[12px] transition-opacity duration-300"
+      onClick={handleClose}
+    >
       <div
         className={`relative bg-white max-w-full max-h-[92vh] flex flex-col rounded-[28px] shadow-[0_30px_90px_rgba(0,0,0,0.3)] text-center animate-in fade-in zoom-in-95 duration-200 transition-all ${
-          step === 1 ? "w-[560px]" : "w-[480px]"
+          step === 1 ? "w-[480px]" : "w-[620px]"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -109,7 +196,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
 
         {/* Modal Header */}
         <div className="pt-8 px-6 sm:px-10 pb-3 flex-shrink-0">
-          {/* Enlarged Brand Logo in Pure Black */}
+          {/* Brand Logo in Pure Black */}
           <div className="relative w-44 h-16 sm:w-52 sm:h-20 mx-auto mb-3">
             <Image
               src="/images/logo.png"
@@ -121,20 +208,24 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
           </div>
 
           {/* Heading */}
-          <h2 className="font-script text-[36px] sm:text-[42px] font-bold text-neutral-900 mb-3 leading-[1.25]">
+          <h2 className="font-script text-[34px] sm:text-[42px] font-bold text-neutral-900 mb-2 leading-[1.25]">
             {step === 3
               ? "Application Received"
-              : step === 2
+              : step === 1
               ? "Join the Waitlist"
+              : mode === "apply"
+              ? "Power Style Application"
               : "Style Questionnaire"}
           </h2>
 
-          <p className="font-sans text-[14px] sm:text-[15px] text-neutral-600 leading-[1.5] max-w-sm mx-auto">
+          <p className="font-sans text-[13.5px] sm:text-[15px] text-neutral-600 leading-[1.5] max-w-md mx-auto">
             {step === 3
-              ? "Thank you for sharing your vision."
-              : step === 2
-              ? "Be the first to experience the Total Style Transformation."
-              : "Please answer a few questions about your business and style goals."}
+              ? "Thank you for sharing your vision with Harriet."
+              : step === 1
+              ? "Enter your details to begin your personal style transformation."
+              : mode === "apply"
+              ? "Complete your style questionnaire to apply. Once submitted, you will be redirected to finalize your enrollment."
+              : "Tell Harriet about your business, vision, and styling goals."}
           </p>
         </div>
 
@@ -147,10 +238,173 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
           )}
 
           {/* ============================================================== */}
-          {/* STEP 1: QUESTIONNAIRE (BEFORE CONTACT DETAILS) */}
+          {/* STEP 1: INITIAL POP-UP (NAME, EMAIL, BUSINESS NAME) */}
+          {/* Questionnaire appears AFTER user submits these details */}
           {/* ============================================================== */}
           {step === 1 && (
-            <form onSubmit={handleQuestionnaireNext} className="space-y-5 font-sans">
+            <form onSubmit={handleContactSubmit} className="space-y-4 font-sans pt-1">
+              <div>
+                <label className="block text-[12px] uppercase tracking-wider font-bold text-neutral-700 mb-1.5">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Sarah Jenkins"
+                  value={contactData.name}
+                  onChange={(e) =>
+                    setContactData({ ...contactData, name: e.target.value })
+                  }
+                  className="w-full px-4 py-3.5 border border-[#e3e3e3] rounded-[14px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-4 focus:ring-black/5 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[12px] uppercase tracking-wider font-bold text-neutral-700 mb-1.5">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. sarah@example.com"
+                  value={contactData.email}
+                  onChange={(e) =>
+                    setContactData({ ...contactData, email: e.target.value })
+                  }
+                  className="w-full px-4 py-3.5 border border-[#e3e3e3] rounded-[14px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-4 focus:ring-black/5 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[12px] uppercase tracking-wider font-bold text-neutral-700 mb-1.5">
+                  Business Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Atelier Luxury PR"
+                  value={contactData.businessName}
+                  onChange={(e) =>
+                    setContactData({ ...contactData, businessName: e.target.value })
+                  }
+                  className="w-full px-4 py-3.5 border border-[#e3e3e3] rounded-[14px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-4 focus:ring-black/5 transition-all"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-4 bg-[#111827] hover:bg-black text-white font-serif text-[16px] uppercase tracking-wider rounded-[14px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
+                >
+                  <span>NEXT: STYLE QUESTIONNAIRE</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="text-[12px] text-neutral-500 text-center pt-1">
+                Harriet works privately with two female founders at a time.
+              </p>
+            </form>
+          )}
+
+          {/* ============================================================== */}
+          {/* STEP 2: STYLE QUESTIONNAIRE */}
+          {/* In "waitlist" mode: shown after submitting Name, Email, Business */}
+          {/* In "apply" mode: shown first with contact details & redirects to payment */}
+          {/* ============================================================== */}
+          {step === 2 && (
+            <form onSubmit={handleQuestionnaireSubmit} className="space-y-6 font-sans">
+              {/* Back to contact details (Waitlist mode only) */}
+              {mode === "waitlist" && (
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="text-xs font-semibold text-neutral-500 hover:text-black uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Back to Contact Details</span>
+                  </button>
+                  <span className="text-xs text-neutral-500 truncate max-w-[200px]">
+                    {contactData.name || contactData.email}
+                  </span>
+                </div>
+              )}
+
+              {/* Contact Details Section (Included in Apply mode so questionnaire is complete) */}
+              {mode === "apply" && (
+                <div className="p-4 sm:p-5 bg-neutral-50/80 rounded-[18px] border border-neutral-200/80 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-serif font-bold text-sm sm:text-base text-neutral-900 tracking-wide uppercase">
+                      Applicant Details
+                    </h3>
+                    <span className="text-[11px] uppercase tracking-wider text-neutral-500 font-semibold">
+                      Required for Payment Link
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider font-bold text-neutral-700 mb-1">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Full Name"
+                        value={contactData.name}
+                        onChange={(e) =>
+                          setContactData({ ...contactData, name: e.target.value })
+                        }
+                        className="w-full px-3.5 py-2.5 bg-white border border-[#e3e3e3] rounded-[10px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-2 focus:ring-black/5"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] uppercase tracking-wider font-bold text-neutral-700 mb-1">
+                        Email Address <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="Email Address"
+                        value={contactData.email}
+                        onChange={(e) =>
+                          setContactData({ ...contactData, email: e.target.value })
+                        }
+                        className="w-full px-3.5 py-2.5 bg-white border border-[#e3e3e3] rounded-[10px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-2 focus:ring-black/5"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] uppercase tracking-wider font-bold text-neutral-700 mb-1">
+                        Business Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Business Name"
+                        value={contactData.businessName}
+                        onChange={(e) =>
+                          setContactData({ ...contactData, businessName: e.target.value })
+                        }
+                        className="w-full px-3.5 py-2.5 bg-white border border-[#e3e3e3] rounded-[10px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-2 focus:ring-black/5"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Style Questions Header */}
+              <div className="pt-1">
+                <h3 className="font-serif font-bold text-sm sm:text-base text-neutral-900 tracking-wide uppercase mb-1">
+                  Style Questionnaire
+                </h3>
+                <p className="text-xs text-neutral-500">
+                  Please answer these questions carefully to assist Harriet in curating your transformation.
+                </p>
+              </div>
+
               {/* Question 1 */}
               <div>
                 <label className="block text-[13px] uppercase tracking-wider font-bold text-neutral-800 mb-1.5">
@@ -242,7 +496,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                         key={option}
                         className={`flex items-center justify-center px-3 py-2.5 border text-xs sm:text-[13px] font-medium rounded-[12px] cursor-pointer text-center transition-all ${
                           answers.whenToBegin === option
-                            ? "bg-neutral-900 text-white border-neutral-900"
+                            ? "bg-neutral-900 text-white border-neutral-900 shadow-sm"
                             : "bg-neutral-50 text-neutral-700 border-neutral-200 hover:border-neutral-400"
                         }`}
                       >
@@ -335,123 +589,80 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                 />
               </div>
 
-              {/* Continue to Waitlist Details */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full py-4 bg-[#111827] hover:bg-black text-white font-serif text-[16px] uppercase tracking-wider rounded-[14px] transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                >
-                  <span>NEXT: ENTER CONTACT DETAILS</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* ============================================================== */}
-          {/* STEP 2: 3 CONTACT DETAILS (NAME, EMAIL, BUSINESS NAME) */}
-          {/* Matches User Screenshot Exactly */}
-          {/* ============================================================== */}
-          {step === 2 && (
-            <form onSubmit={handleFinalSubmit} className="space-y-4 font-sans pt-1">
-              {/* 1. Full Name */}
-              <div>
-                <input
-                  type="text"
-                  required
-                  placeholder="Full Name"
-                  value={contactData.name}
-                  onChange={(e) =>
-                    setContactData({ ...contactData, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3.5 border border-[#e3e3e3] rounded-[14px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-4 focus:ring-black/5 transition-all"
-                />
-              </div>
-
-              {/* 2. Email Address */}
-              <div>
-                <input
-                  type="email"
-                  required
-                  placeholder="Email Address"
-                  value={contactData.email}
-                  onChange={(e) =>
-                    setContactData({ ...contactData, email: e.target.value })
-                  }
-                  className="w-full px-4 py-3.5 border border-[#e3e3e3] rounded-[14px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-4 focus:ring-black/5 transition-all"
-                />
-              </div>
-
-              {/* 3. Business Name */}
-              <div>
-                <input
-                  type="text"
-                  required
-                  placeholder="Business Name"
-                  value={contactData.businessName}
-                  onChange={(e) =>
-                    setContactData({ ...contactData, businessName: e.target.value })
-                  }
-                  className="w-full px-4 py-3.5 border border-[#e3e3e3] rounded-[14px] text-sm text-neutral-900 focus:outline-none focus:border-black focus:ring-4 focus:ring-black/5 transition-all"
-                />
-              </div>
-
-              {/* Submit Button */}
+              {/* Action Button */}
               <div className="pt-2">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 bg-[#111827] hover:bg-black text-white font-serif text-[17px] uppercase tracking-wider rounded-[14px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-[#111827] hover:bg-black text-white font-serif text-[16px] uppercase tracking-wider rounded-[14px] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>JOINING...</span>
+                      <span>
+                        {mode === "apply"
+                          ? "REDIRECTING TO PAYMENT..."
+                          : "SUBMITTING APPLICATION..."}
+                      </span>
+                    </>
+                  ) : mode === "apply" ? (
+                    <>
+                      <Lock className="w-4 h-4 text-[#d1b7a1]" />
+                      <span>SUBMIT & PROCEED TO PAYMENT ($5,000)</span>
+                      <ArrowUpRight className="w-4 h-4" />
                     </>
                   ) : (
-                    <span>JOIN WAITLIST</span>
+                    <>
+                      <span>SUBMIT APPLICATION</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
                   )}
                 </button>
               </div>
 
-              {/* Back to questions link */}
-              <div className="pt-2 text-center">
-                <button
-                  type="button"
-                  onClick={() => setStep(1)}
-                  className="text-xs font-semibold text-neutral-500 hover:text-black uppercase tracking-wider flex items-center justify-center gap-1 mx-auto transition-colors"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Review Questionnaire Answers</span>
-                </button>
-              </div>
+              {mode === "apply" && (
+                <div className="flex items-center justify-center gap-1.5 text-xs text-neutral-500 pt-1 text-center">
+                  <Lock className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>Secure 256-bit encrypted checkout via Stripe</span>
+                </div>
+              )}
             </form>
           )}
 
           {/* ============================================================== */}
-          {/* STEP 3: SUCCESS STATE */}
+          {/* STEP 3: SUCCESS STATE (WAITLIST POP-UP FLOW) */}
           {/* ============================================================== */}
           {step === 3 && (
-            <div className="py-6 text-center space-y-3">
+            <div className="py-6 text-center space-y-4 font-sans">
               <div className="w-16 h-16 bg-[#e7faf0] text-[#085229] rounded-full flex items-center justify-center mx-auto border border-[#13ce66]/40">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
 
-              <h3 className="font-serif font-bold text-lg text-[#085229]">
-                Thank You, {contactData.name}!
-              </h3>
+              <div>
+                <h3 className="font-serif font-bold text-xl text-neutral-900">
+                  Thank You, {contactData.name}!
+                </h3>
+                <p className="font-sans text-sm text-neutral-600 leading-relaxed max-w-sm mx-auto mt-2">
+                  Your style questionnaire has been received. Harriet will review your answers and be in touch with you shortly at{" "}
+                  <span className="font-semibold text-neutral-900">
+                    {contactData.email}
+                  </span>.
+                </p>
+              </div>
 
-              <p className="font-sans text-sm text-[#085229] leading-relaxed max-w-sm mx-auto">
-                You are on the waitlist for Harriet O&apos;Donovan. We will review your answers and be in touch with you shortly at{" "}
-                <span className="font-semibold text-neutral-900">
-                  {contactData.email}
-                </span>.
-              </p>
+              <div className="pt-2 flex flex-col gap-2.5 max-w-sm mx-auto">
+                <button
+                  onClick={handleProceedToPaymentFromSuccess}
+                  className="w-full py-3.5 px-6 bg-[#111827] hover:bg-black text-white font-serif text-[14px] uppercase tracking-wider rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                >
+                  <Lock className="w-4 h-4 text-[#d1b7a1]" />
+                  <span>SECURE YOUR SPOT — PROCEED TO PAYMENT</span>
+                  <ArrowUpRight className="w-4 h-4" />
+                </button>
 
-              <div className="pt-3">
                 <button
                   onClick={handleClose}
-                  className="px-7 py-2.5 bg-[#085229] text-white text-xs uppercase tracking-widest font-semibold rounded-xl hover:opacity-90 transition-opacity"
+                  className="w-full py-2.5 text-xs uppercase tracking-widest font-semibold text-neutral-500 hover:text-black transition-colors"
                 >
                   Done
                 </button>
