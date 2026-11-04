@@ -10,7 +10,7 @@ const navLinks = [
   { name: "HOME", href: "/" },
   { name: "ABOUT", href: "/about" },
   { name: "LUXURY STYLING", href: "/luxury-styling" },
-  { name: "TOTAL STYLE TRANSFORMATION", href: "/total-style-transformation" },
+  { name: "THE POWER STYLE TRANSFORMATION", href: "/total-style-transformation" },
 ];
 
 export default function Navbar() {
@@ -28,17 +28,17 @@ export default function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full bg-white/98 backdrop-blur-md transition-all duration-300 ${
         isScrolled ? "shadow-sm py-2" : "py-3 md:py-4"
-      } border-b border-neutral-200/80`}
+      } border-b border-neutral-200/60`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 md:h-16">
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14">
+        <div className="flex items-center justify-between h-20 md:h-24">
           {/* Brand Logo on Left */}
-          <Link href="/" className="flex items-center group">
-            <div className="relative w-36 h-12 md:w-44 md:h-14 transition-transform duration-300 group-hover:scale-[1.02]">
+          <Link href="/" className="flex items-center group flex-shrink-0">
+            <div className="relative w-[150px] h-[85px] transition-transform duration-300 group-hover:scale-[1.02]">
               <Image
-                src="/images/logo.png"
+                src="/images/cropped-Harriet_O_Donovan_logo-transparent-150x85.png"
                 alt="Harriet O'Donovan Dubai"
                 fill
                 className="object-contain object-left"
@@ -48,17 +48,17 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation Links on Right */}
-          <nav className="hidden lg:flex items-center space-x-7 xl:space-x-9">
+          <nav className="hidden lg:flex items-center space-x-7 xl:space-x-10 font-nav">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-[12px] xl:text-[13px] tracking-[0.22em] uppercase font-sans font-medium transition-colors duration-200 ${
+                  className={`text-[17px] xl:text-[18px] uppercase tracking-normal font-light transition-colors duration-200 ${
                     isActive
-                      ? "text-neutral-900 border-b border-neutral-900 pb-0.5"
-                      : "text-neutral-700 hover:text-black"
+                      ? "text-black font-normal"
+                      : "text-black/90 hover:text-black"
                   }`}
                 >
                   {link.name}
@@ -68,7 +68,7 @@ export default function Navbar() {
 
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center px-6 py-2.5 text-[12px] xl:text-[13px] font-sans uppercase tracking-[0.22em] font-medium border border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white transition-all duration-300 rounded-none shadow-none"
+              className="inline-flex items-center justify-center px-6 py-2.5 text-[17px] xl:text-[18px] uppercase font-nav font-light border border-black text-black hover:bg-black hover:text-white transition-all duration-300 rounded-none"
             >
               LET&apos;S STYLE
             </Link>
@@ -93,7 +93,7 @@ export default function Navbar() {
           isOpen ? "max-h-96 border-t border-neutral-200 bg-white" : "max-h-0"
         }`}
       >
-        <div className="px-6 pt-4 pb-6 space-y-4">
+        <div className="px-6 pt-4 pb-6 space-y-4 font-nav">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -101,8 +101,8 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsOpen(false)}
-                className={`block text-xs uppercase tracking-[0.22em] font-sans font-medium py-2 ${
-                  isActive ? "text-black font-semibold" : "text-neutral-700"
+                className={`block text-base uppercase font-light py-2 ${
+                  isActive ? "text-black font-medium" : "text-neutral-700"
                 }`}
               >
                 {link.name}
@@ -113,7 +113,7 @@ export default function Navbar() {
             <Link
               href="/contact"
               onClick={() => setIsOpen(false)}
-              className="block w-full text-center py-3 text-xs uppercase tracking-[0.22em] font-sans font-medium border border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-white transition-colors"
+              className="block w-full text-center py-3 text-base uppercase font-light border border-black text-black hover:bg-black hover:text-white transition-colors"
             >
               LET&apos;S STYLE
             </Link>

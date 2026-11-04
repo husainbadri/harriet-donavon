@@ -25,6 +25,7 @@ const config: Config = {
         serif: ["var(--font-serif)", "Noto Serif", "Georgia", "serif"],
         script: ["Brittany", "Parisienne", "cursive"],
         sans: ["var(--font-sans)", "Helvetica", "Arial", "sans-serif"],
+        nav: ["var(--font-dm-sans)", "DM Sans", "sans-serif"],
       },
       transitionTimingFunction: {
         "luxury": "cubic-bezier(0.22, 1, 0.36, 1)",
